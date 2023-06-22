@@ -16,9 +16,6 @@ release.properties
 .vscode
 .factorypath
 
-# OSX
-.DS_Store
-
 # Vim
 *.swp
 *.swo
