@@ -4,13 +4,13 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import {
-    createBrowserRouter,
+    createHashRouter,
     RouterProvider,
 } from "react-router-dom";
 import ErrorPage from "./ErrorPage";
 import Contact from "./Contact";
 
-const router = createBrowserRouter([
+const router = createHashRouter([
     {
         path: "/",
         element: <App />,
