@@ -18,6 +18,13 @@ $ npx create-react-app frontend
 The backend is a Quarkus app serving the backend as static resources, see
 <https://quarkus.io/guides/http-reference#serving-static-resources>.
 
+## Setting up React
+
+```shell
+$ cd frontend/
+$ npm install
+```
+
 ## Build & run
 
 In production mode, OIDC will be used:
