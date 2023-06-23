@@ -10,7 +10,6 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 import java.util.Collection;
 
 @Path("/hello")
-//@Authenticated
 public class GreetingResource {
 
     @Inject
