@@ -45,3 +45,5 @@ $ npm start
 * <https://create-react-app.dev/docs/deployment/#serving-the-same-build-from-different-paths>
 * <https://stackoverflow.com/questions/76435306/babel-preset-react-app-is-importing-the-babel-plugin-proposal-private-propert>
 * <https://reactrouter.com/en/main/start/tutorial>
+* <https://quarkus.io/guides/security-oidc-code-flow-authentication-tutorial>
+* <https://github.com/quarkusio/quarkus-quickstarts/tree/main/security-openid-connect-web-authentication-quickstart>
