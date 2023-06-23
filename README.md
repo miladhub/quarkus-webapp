@@ -5,7 +5,9 @@
 When in dev mode, this project will use basic authentication, so no prerequisites.
 
 When run in production mode, this projects needs:
-* A [Keycloak](https://www.keycloak.org) server must be installed listening on <http://localhost:8180/>
+* A [Keycloak](https://www.keycloak.org) server must be installed listening on <http://KC_HOST:KC_PORT/>,
+where `KC_HOST` and `KC_PORT` are the Keycloak listening host and port (if using `localhost`, choose a port
+different from 8080)
 * OpenID connect (OIDC) client must be configured on it - we'll use id `my-client-id` here
 * The client credential will be assumed to be `my-secret`
 
@@ -60,7 +62,7 @@ In production mode,
 ```shell
 $ ./build.sh
 $ java \ 
-  -Dquarkus.oidc.auth-server-url=http://localhost:8180/realms/quarkus \
+  -Dquarkus.oidc.auth-server-url=http://KC_HOST:KC_PORT/realms/quarkus \
   -Dquarkus.oidc.client-id=my-client-id \
   -Dquarkus.oidc.credentials.secret=my-secret \
   -jar backend/target/quarkus-app/quarkus-run.jar
