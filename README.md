@@ -2,6 +2,8 @@
 
 ## Prerequisites
 
+When in dev mode, this project will use basic authentication, so no prerequisites.
+
 When run in production mode, this projects needs:
 * A [Keycloak](https://www.keycloak.org) server must be installed listening on <http://localhost:8180/>
 * OpenID connect (OIDC) client must be configured on it - we'll use id `my-client-id` here
@@ -27,23 +29,13 @@ $ npm install
 
 ## Build & run
 
-In production mode, OIDC will be used:
+### Dev mode
 
-```shell
-$ ./build.sh
-$ java \ 
-  -Dquarkus.oidc.auth-server-url=http://localhost:8180/realms/quarkus \
-  -Dquarkus.oidc.client-id=my-client-id \
-  -Dquarkus.oidc.credentials.secret=my-secret \
-  -jar backend/target/quarkus-app/quarkus-run.jar
-```
+In dev mode,
+* both the backend and the frontend support hot reload
+* basic authentication is used, with a default user `admin` / `admin`
 
-Open <http://localhost:8080/> to see the app.
-
-# Dev mode
-
-In dev mode, the backend will use basic authentication, with a default
-user `admin` / `admin`:
+Backend:
 
 ```shell
 $ cd backend
@@ -56,6 +48,25 @@ Frontend:
 $ cd frontend
 $ npm start
 ```
+
+Open <http://localhost:3000/> to see the app.
+
+### Production mode
+
+In production mode,
+* the frontend build is bundled into the Quarkus backend, under `META-INF/resources`
+* OIDC is used for authentication
+
+```shell
+$ ./build.sh
+$ java \ 
+  -Dquarkus.oidc.auth-server-url=http://localhost:8180/realms/quarkus \
+  -Dquarkus.oidc.client-id=my-client-id \
+  -Dquarkus.oidc.credentials.secret=my-secret \
+  -jar backend/target/quarkus-app/quarkus-run.jar
+```
+
+Open <http://localhost:8080/> to see the app.
 
 ## References
 
