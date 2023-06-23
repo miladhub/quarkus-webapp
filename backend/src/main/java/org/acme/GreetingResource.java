@@ -1,11 +1,11 @@
 package org.acme;
 
+import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.Collection;
 
@@ -13,13 +13,13 @@ import java.util.Collection;
 public class GreetingResource {
 
     @Inject
-    JsonWebToken accessToken;
+    SecurityIdentity securityIdentity;
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     public String hello() {
-        String userId = accessToken.getClaim("preferred_username");
-        Collection<String> groups = accessToken.getClaim("groups");
+        String userId = securityIdentity.getPrincipal().getName();
+        Collection<String> groups = securityIdentity.getRoles();
         return String.format(
                 "Hello from RESTEasy Reactive. You are %s, and have groups %s",
                 userId, groups);
