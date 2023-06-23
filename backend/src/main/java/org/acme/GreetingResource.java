@@ -8,6 +8,9 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.joining;
 
 @Path("/hello")
 public class GreetingResource {
@@ -21,7 +24,7 @@ public class GreetingResource {
         String userId = securityIdentity.getPrincipal().getName();
         Collection<String> groups = securityIdentity.getRoles();
         return String.format(
-                "Hello from RESTEasy Reactive. You are %s, and have groups %s",
-                userId, groups);
+                "Hello, you are %s, with groups %s",
+                userId, groups.stream().sorted().collect(joining(", ")));
     }
 }

@@ -11,11 +11,11 @@ public class GreetingResourceTest {
 
     @Test
     public void testHelloEndpoint() {
-        given()
+        given().auth().basic("test", "test")
           .when().get("/hello")
           .then()
              .statusCode(200)
-             .body(startsWith("Hello from RESTEasy Reactive"));
+             .body(startsWith("Hello, you are test, with groups bar, foo"));
     }
 
 }
