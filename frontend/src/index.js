@@ -3,10 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import {
-    createHashRouter,
-    RouterProvider,
-} from "react-router-dom";
+import {createHashRouter, RouterProvider} from 'react-router-dom';
 import ErrorPage from "./ErrorPage";
 import Contact from "./Contact";
 
@@ -17,7 +14,7 @@ const router = createHashRouter([
         errorElement: <ErrorPage />,
     },
     {
-        path: "contacts/:contactId",
+        path: "/contacts/:contactId",
         element: <Contact />,
     },
 ]);

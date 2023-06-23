@@ -8,17 +8,16 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
 
-@Path("/hello")
+@Path("/")
 public class GreetingResource {
-
     @Inject
     SecurityIdentity securityIdentity;
 
     @GET
+    @Path("/hello")
     @Produces(MediaType.TEXT_PLAIN)
     public String hello() {
         String userId = securityIdentity.getPrincipal().getName();
@@ -26,5 +25,12 @@ public class GreetingResource {
         return String.format(
                 "Hello, you are %s, with groups %s",
                 userId, groups.stream().sorted().collect(joining(", ")));
+    }
+
+    @GET
+    @Path("/name")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String name() {
+        return securityIdentity.getPrincipal().getName();
     }
 }

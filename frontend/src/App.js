@@ -2,7 +2,7 @@ import './App.css';
 import {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
 
-function App() {
+export default function App() {
     const [greeting, setGreeting] = useState("-");
 
     useEffect(() => {
@@ -35,5 +35,3 @@ function App() {
         </div>
     );
 }
-
-export default App;
