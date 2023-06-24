@@ -19,7 +19,7 @@ The backend is a Quarkus app serving the backend as static resources, see
 
 ## Installing Keycloak
 
-This section is an extract of <https://quarkus.io/guides/security-oidc-code-flow-authentication-tutorial>:
+This section takes inspiration from <https://quarkus.io/guides/security-oidc-code-flow-authentication-tutorial>:
 
 ```shell
 docker run --name keycloak -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=admin \
@@ -27,7 +27,16 @@ docker run --name keycloak -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=ad
 ```
 
 Enter Keycloak at <http://localhost:8180/admin/> with credentials `admin` / `admin`, create a realm
-from the top-left realms menu, and import [this file](https://github.com/quarkusio/quarkus-quickstarts/blob/main/security-openid-connect-web-authentication-quickstart/config/quarkus-realm.json).
+from the top-left realms menu, and import [this file](backend/config/realm-export.json).
+
+From the realm Users page, create a user, e.g.:
+* Username: `alice`
+* Email: `alice@fake.com`
+* Email verified: `true`
+
+From the user's Credentials tab, choose "Set Password":
+* Password / Password confirmation: `alice`
+* Temporary: `false`
 
 ## Setting up React
 
@@ -69,9 +78,9 @@ In production mode,
 ```shell
 $ ./build.sh
 $ java \
-  -Dquarkus.oidc.auth-server-url=http://localhost:8180/realms/quarkus \
+  -Dquarkus.oidc.auth-server-url=http://localhost:8180/realms/frontend \
   -Dquarkus.oidc.client-id=frontend \
-  -Dquarkus.oidc.credentials.secret=secret \
+  -Dquarkus.oidc.credentials.secret=vpoqXFHXDBLN4qfVSTt7kODg4weRgZ2b \
   -jar backend/target/quarkus-app/quarkus-run.jar
 ```
 
