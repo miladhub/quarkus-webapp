@@ -2,14 +2,9 @@
 
 ## Prerequisites
 
-When in dev mode, this project will use basic authentication, so no prerequisites.
-
-When run in production mode, this projects needs:
-* A [Keycloak](https://www.keycloak.org) server must be installed listening on <http://KC_HOST:KC_PORT/>,
-where `KC_HOST` and `KC_PORT` are the Keycloak listening host and port (if using `localhost`, choose a port
-different from 8080)
-* OpenID connect (OIDC) client must be configured on it - we'll use id `my-client-id` here
-* The client credential will be assumed to be `my-secret`
+* Docker
+* Java >= 17
+* Node.js
 
 ## Project structure
 
@@ -21,6 +16,18 @@ $ npx create-react-app frontend
 
 The backend is a Quarkus app serving the backend as static resources, see
 <https://quarkus.io/guides/http-reference#serving-static-resources>.
+
+## Installing Keycloak
+
+This section is an extract of <https://quarkus.io/guides/security-oidc-code-flow-authentication-tutorial>:
+
+```shell
+docker run --name keycloak -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=admin \
+  -p 8180:8080 quay.io/keycloak/keycloak:21.1.1 start-dev
+```
+
+Enter Keycloak at <http://localhost:8180/admin/> with credentials `admin` / `admin`, create a realm
+from the top-left realms menu, and import [this file](https://github.com/quarkusio/quarkus-quickstarts/blob/main/security-openid-connect-web-authentication-quickstart/config/quarkus-realm.json).
 
 ## Setting up React
 
@@ -61,10 +68,10 @@ In production mode,
 
 ```shell
 $ ./build.sh
-$ java \ 
-  -Dquarkus.oidc.auth-server-url=http://KC_HOST:KC_PORT/realms/quarkus \
-  -Dquarkus.oidc.client-id=my-client-id \
-  -Dquarkus.oidc.credentials.secret=my-secret \
+$ java \
+  -Dquarkus.oidc.auth-server-url=http://localhost:8180/realms/quarkus \
+  -Dquarkus.oidc.client-id=frontend \
+  -Dquarkus.oidc.credentials.secret=secret \
   -jar backend/target/quarkus-app/quarkus-run.jar
 ```
 
