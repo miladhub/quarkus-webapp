@@ -67,7 +67,7 @@ $ cd frontend
 $ npm start
 ```
 
-Open <http://localhost:3000/> to see the app.
+Open <http://localhost:3000/> to see the app, using credentials `admin` / `admin`.
 
 ### Production mode
 
@@ -87,7 +87,7 @@ $ npm --prefix frontend run build && \
   -jar backend/target/quarkus-app/quarkus-run.jar
 ```
 
-Open <http://localhost:8080/> to see the app.
+Open <http://localhost:8080/> to see the app, using credentials `alice` / `alice`.
 
 ## References
 
