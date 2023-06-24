@@ -76,8 +76,11 @@ In production mode,
 * OIDC is used for authentication
 
 ```shell
-$ ./build.sh
-$ java \
+$ npm --prefix frontend run build && \
+  rm -rf backend/src/main/resources/META-INF/resources/ && \
+  cp -r frontend/build/ backend/src/main/resources/META-INF/resources/ && \
+  mvn clean install -f backend -DskipTests && \
+  java \
   -Dquarkus.oidc.auth-server-url=http://localhost:8180/realms/frontend \
   -Dquarkus.oidc.client-id=frontend \
   -Dquarkus.oidc.credentials.secret=vpoqXFHXDBLN4qfVSTt7kODg4weRgZ2b \

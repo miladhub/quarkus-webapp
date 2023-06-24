@@ -7,14 +7,9 @@ export default function App() {
 
     useEffect(() => {
         fetch('hello')
-            .then((response) => response.text())
-            .then((greeting) => {
-                console.log(greeting);
-                setGreeting(greeting);
-            })
-            .catch((err) => {
-                console.log(err.message);
-            });
+            .then(response => response.text())
+            .then(setGreeting)
+            .catch(err => console.log(err.message));
     }, []);
 
     return (

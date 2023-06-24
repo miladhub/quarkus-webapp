@@ -7,11 +7,9 @@ export default function Contact() {
 
     useEffect(() => {
         fetch('name')
-            .then((response) => response.text())
+            .then(response => response.text())
             .then(setName)
-            .catch((err) => {
-                console.log(err.message);
-            });
+            .catch(err => console.log(err.message));
     }, []);
 
     return (
