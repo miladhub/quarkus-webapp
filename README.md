@@ -27,7 +27,7 @@ docker run --name keycloak -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=ad
 ```
 
 Enter Keycloak at <http://localhost:8180/admin/> with credentials `admin` / `admin`, create a realm
-from the top-left realms menu, and import [this file](backend/config/realm-export.json).
+from the top-left realms menu, and import [this JSON file](backend/config/realm-export.json).
 
 From the realm Users page, create a user, e.g.:
 * Username: `alice`
@@ -122,7 +122,9 @@ $ docker run --name keycloak-proxy -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PAS
   --proxy edge --http-relative-path=/kc --hostname-strict=false --hostname-url=https://localhost/kc
 ```
 
-Clone <https://github.com/miladhub/apache-https> cloned to a folder of your choice - e.g., `/path/to/apache-https/` -
+Also remember to import [this JSON file](backend/config/realm-export.json) on top of that.
+
+Clone <https://github.com/miladhub/apache-https> to a folder of your choice - e.g., `/path/to/apache-https/` -
 and add the following lines to file `http-ssl.conf` right before the closing `</VirtualHost>`:
 
 ```shell
@@ -139,22 +141,24 @@ and add the following lines to file `http-ssl.conf` right before the closing `</
 </Location>
 ```
 
-Copy this file to the Apache container:
+Copy this file to the Apache container and restart it:
 
 ```shell
 $ docker cp httpd-ssl.conf apache-https:/usr/local/apache2/conf/extra
 $ docker restart apache-https
 ```
 
-Create a TLS trust store to allow Quarkus to connect to Keycloak over HTTPS, choosing password `changeit`:
+Create a TLS trust store to allow Quarkus to connect to Keycloak over HTTPS,
+starting from the certificate used to configure the Apache server - here we are
+choosing demo password `changeit`:
 
 ```shell
-keytool -importcert -alias keycloak \
-  -keystore /path/to/cacerts \
-  -file /path/to/localhost.crt
+keytool -importcert -alias keycloak -keystore cacerts \
+  -file /path/to/apache-https/localhost.crt
 ```
 
-Then, add this to `application.properties`:
+Then, add this to `application.properties` (I haven't been able to reverse proxy
+the app and change its context path at the same time):
 
 ```properties
 quarkus.http.root-path=app
@@ -173,12 +177,13 @@ $ java \
   -Dquarkus.http.proxy.allow-forwarded=false \
   -Dquarkus.http.proxy.enable-forwarded-host=true \
   -Dquarkus.http.proxy.forwarded-host-header=X-Forwarded-Host \
-  -Djavax.net.ssl.trustStore=/path/to/cacerts \
+  -Djavax.net.ssl.trustStore=cacerts \
   -Djavax.net.ssl.trustStorePassword=changeit \
   -jar backend/target/quarkus-app/quarkus-run.jar
 ```
 
-This will allow using <https://localhost/app> with both Keycloak and the webapp behind a TLS-enabled reverse proxy.
+This will allow using <https://localhost/app/> (mind the trailing slash!) with
+both Keycloak and the webapp behind a TLS-enabled reverse proxy.
 
 See
 * <https://blog.sebastian-daschner.com/entries/quarkus-ssl-url-behind-reverse-proxy>
