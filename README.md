@@ -117,8 +117,8 @@ Open <http://localhost:8080/> to see the app, using credentials `alice` / `alice
 *Disclaimer* - Reverse proxying so far has these limitations / notes:
 * The final app URL needs a final slash ("/"), otherwise it won't work
 * I couldn't find a way to reverse proxy _and_ change the context path at the same time
-* I had to add `ProxyPreserveHost` to the Apache configuration because otherwise the redirect_uri sent
-by Kecloak pointed at the internal app address
+* I had to add `ProxyPreserveHost` to the Apache configuration because otherwise the `redirect_uri` sent
+by Keycloak pointed at the internal app address
 
 Start Keycloak in [reverse proxy](https://www.keycloak.org/server/reverseproxy) mode:
 
