@@ -5,4 +5,4 @@
 
 .env
 
-cacerts
+*.p12
