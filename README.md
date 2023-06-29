@@ -172,7 +172,7 @@ choosing demo password `changeit`:
 
 ```shell
 keytool -importcert -alias keycloak -keystore cacerts.p12 \
-  -file /path/to/apache-https/localhost.crt -storepasswd changeit
+  -file localhost.crt -storepasswd changeit
 ```
 
 Then, add this to `application.properties` (I haven't been able to reverse proxy
