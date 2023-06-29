@@ -124,43 +124,55 @@ Start Keycloak in [reverse proxy](https://www.keycloak.org/server/reverseproxy) 
 
 ```shell
 $ docker run --name keycloak-proxy -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=admin \
-  -p 8180:8080 quay.io/keycloak/keycloak:21.1.1 start-dev \
+  -p 8180:8080 quay.io/keycloak/keycloak:21.1.1 start \
   --proxy edge --http-relative-path=/kc --hostname-strict=false --hostname-url=https://localhost/kc
 ```
 
 Also remember to import [this JSON file](backend/config/realm-export.json) on top of that.
 
-Clone <https://github.com/miladhub/apache-https> to a folder of your choice - e.g., `/path/to/apache-https/` -
-and add the following lines to file `http-ssl.conf` right before the closing `</VirtualHost>`:
+## Creating the certificate
+
+Create the server private key `server.key` and the self-signed SSL certificate `server.crt` as follows:
 
 ```shell
-<Location /kc>
-  ProxyPass http://host.docker.internal:8180/kc
-  ProxyPassReverse http://host.docker.internal:8180/kc
-  ProxyPreserveHost On
-</Location>
-
-<Location /app>
-  ProxyPass http://host.docker.internal:8080/app
-  ProxyPassReverse http://host.docker.internal:8080/app
-  ProxyPreserveHost On
-</Location>
+openssl genrsa -des3 -passout pass:x -out server.pass.key 2048
+openssl rsa -passin pass:x -in server.pass.key -out server.key
+openssl req -new -key server.key -out server.csr \
+  -subj "/C=IT/ST=Italy/L=Bologna/O=FooBar inc/OU=Nerds/CN=foo.bar.baz"
+openssl x509 -req -sha256 -days 365 -in server.csr -signkey server.key -out server.crt
+rm server.pass.key server.csr
 ```
 
-Copy this file to the Apache container and restart it:
+Alternatively, to avoid self-signed certificate warnings, install [mkcert](https://github.com/FiloSottile/mkcert) and issue the following commands:
 
 ```shell
-$ docker cp httpd-ssl.conf apache-https:/usr/local/apache2/conf/extra
-$ docker restart apache-https
+mkcert --install
+mkcert localhost
+openssl x509 -outform der -in localhost.pem -out localhost.crt
+openssl pkey -in localhost-key.pem -out localhost.key
 ```
+
+## Setting up Apache
+
+```
+docker rm -f apache-https
+docker run -dit --name apache-https -p 443:443 httpd:2.4.49
+docker cp httpd.conf apache-https:/usr/local/apache2/conf
+docker cp httpd-ssl.conf apache-https:/usr/local/apache2/conf/extra
+docker cp localhost.pem apache-https:/usr/local/apache2/conf/server.crt
+docker cp localhost.key apache-https:/usr/local/apache2/conf/server.key
+docker restart apache-https
+```
+
+## Create the trust store to connect to Apache
 
 Create a TLS trust store to allow Quarkus to connect to Keycloak over HTTPS,
 starting from the certificate used to configure the Apache server - here we are
 choosing demo password `changeit`:
 
 ```shell
-keytool -importcert -alias keycloak -keystore cacerts \
-  -file /path/to/apache-https/localhost.crt
+keytool -importcert -alias keycloak -keystore cacerts.p12 \
+  -file /path/to/apache-https/localhost.crt -storepasswd changeit
 ```
 
 Then, add this to `application.properties` (I haven't been able to reverse proxy
@@ -183,7 +195,7 @@ $ java \
   -Dquarkus.http.proxy.allow-forwarded=false \
   -Dquarkus.http.proxy.enable-forwarded-host=true \
   -Dquarkus.http.proxy.forwarded-host-header=X-Forwarded-Host \
-  -Djavax.net.ssl.trustStore=cacerts \
+  -Djavax.net.ssl.trustStore=cacerts.p12 \
   -Djavax.net.ssl.trustStorePassword=changeit \
   -jar backend/target/quarkus-app/quarkus-run.jar
 ```
