@@ -175,13 +175,6 @@ keytool -importcert -alias keycloak -keystore cacerts.p12 \
   -file localhost.crt -storepasswd changeit
 ```
 
-Then, add this to `application.properties` (I haven't been able to reverse proxy
-the app and change its context path at the same time):
-
-```properties
-quarkus.http.root-path=app
-```
-
 Finally, re-package and run the app following guide <https://quarkus.io/guides/http-reference#reverse-proxy>:
 
 ```shell
@@ -191,12 +184,15 @@ $ java \
   -Dquarkus.oidc.client-id=frontend \
   -Dquarkus.oidc.credentials.secret=vpoqXFHXDBLN4qfVSTt7kODg4weRgZ2b \
   -Dquarkus.oidc.authentication.force-redirect-https-scheme=true \
+  -Dquarkus.oidc.authentication.redirect-path=/foo \
   -Dquarkus.http.proxy.proxy-address-forwarding=true \
   -Dquarkus.http.proxy.allow-forwarded=false \
   -Dquarkus.http.proxy.enable-forwarded-host=true \
   -Dquarkus.http.proxy.forwarded-host-header=X-Forwarded-Host \
   -Djavax.net.ssl.trustStore=cacerts.p12 \
   -Djavax.net.ssl.trustStorePassword=changeit \
+  -Dquarkus.http.proxy.enable-forwarded-prefix=true \
+  -Dquarkus.http.proxy.forwarded-prefix-header=X-Forwarded-Prefix \
   -jar backend/target/quarkus-app/quarkus-run.jar
 ```
 
