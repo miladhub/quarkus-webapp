@@ -120,6 +120,8 @@ Open <http://localhost:8080/> to see the app, using credentials `alice` / `alice
 * I had to add `ProxyPreserveHost` to the Apache configuration because otherwise the `redirect_uri` sent
 by Keycloak pointed at the internal app address
 
+## Setting up Keycloak
+
 Start Keycloak in [reverse proxy](https://www.keycloak.org/server/reverseproxy) mode:
 
 ```shell
@@ -128,7 +130,13 @@ $ docker run --name keycloak-proxy -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PAS
   --proxy edge --http-relative-path=/kc --hostname-strict=false --hostname-url=https://localhost/kc
 ```
 
-Also remember to import [this JSON file](backend/config/realm-export.json) on top of that.
+Access [Keycloak](http://localhost:8180/kc/admin/) and import [this JSON file](backend/config/realm-export.json) on top of that.
+
+Create a user in the realm:
+* Username: `foo`
+* Email: `foo@fake.com`
+* Email verified `true`
+* Credentials > Set password `foo`, Temporary: `false`
 
 ## Creating the certificate
 
@@ -154,7 +162,7 @@ openssl pkey -in localhost-key.pem -out localhost.key
 
 ## Setting up Apache
 
-```
+```shell
 docker rm -f apache-https
 docker run -dit --name apache-https -p 443:443 httpd:2.4.49
 docker cp httpd.conf apache-https:/usr/local/apache2/conf
@@ -171,30 +179,40 @@ starting from the certificate used to configure the Apache server - here we are
 choosing demo password `changeit`:
 
 ```shell
-keytool -importcert -alias keycloak -keystore cacerts.p12 \
-  -file localhost.crt -storepasswd changeit
+$ keytool -importcert -alias keycloak -keystore cacerts.p12 -file localhost.crt
+```
+
+To confirm success, list its contents (same password):
+
+```shell
+$ keytool -list -keystore cacerts.p12
 ```
 
 Finally, re-package and run the app following guide <https://quarkus.io/guides/http-reference#reverse-proxy>:
 
 ```shell
-$ mvn clean package -f backend
-$ java \
-  -Dquarkus.oidc.auth-server-url=https://localhost/kc/realms/frontend \
-  -Dquarkus.oidc.client-id=frontend \
-  -Dquarkus.oidc.credentials.secret=vpoqXFHXDBLN4qfVSTt7kODg4weRgZ2b \
-  -Dquarkus.oidc.authentication.force-redirect-https-scheme=true \
-  -Dquarkus.oidc.authentication.redirect-path=/foo \
-  -Dquarkus.http.proxy.proxy-address-forwarding=true \
-  -Dquarkus.http.proxy.allow-forwarded=false \
-  -Dquarkus.http.proxy.enable-forwarded-host=true \
-  -Dquarkus.http.proxy.forwarded-host-header=X-Forwarded-Host \
-  -Djavax.net.ssl.trustStore=cacerts.p12 \
-  -Djavax.net.ssl.trustStorePassword=changeit \
-  -Dquarkus.http.proxy.enable-forwarded-prefix=true \
-  -Dquarkus.http.proxy.forwarded-prefix-header=X-Forwarded-Prefix \
+$ java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 \
+  -Dquarkus.log.level=DEBUG \
+  -Dquarkus.log.min-level=DEBUG \
   -jar backend/target/quarkus-app/quarkus-run.jar
 ```
+
+-Dquarkus.http.proxy.forwarded-host-header=X-Forwarded-Host \
+-Dquarkus.oidc.authentication.redirect-path=/app \
+
+-Dquarkus.http.proxy.proxy-address-forwarding=true \
+-Dquarkus.http.proxy.allow-forwarded=false \
+-Dquarkus.http.proxy.enable-forwarded-host=true \
+-Djavax.net.ssl.trustStore=cacerts.p12 \
+-Djavax.net.ssl.trustStorePassword=changeit \
+
+-Dquarkus.oidc.auth-server-url=https://localhost/kc/realms/frontend \
+-Dquarkus.oidc.client-id=frontend \
+-Dquarkus.oidc.credentials.secret=vpoqXFHXDBLN4qfVSTt7kODg4weRgZ2b \
+-Dquarkus.oidc.authentication.force-redirect-https-scheme=true \
+
+-Dquarkus.http.proxy.enable-forwarded-prefix=true \
+  -Dquarkus.http.proxy.forwarded-prefix-header=X-Forwarded-Prefix \
 
 This will allow using <https://localhost/app/> (mind the trailing slash!) with
 both Keycloak and the webapp behind a TLS-enabled reverse proxy.
