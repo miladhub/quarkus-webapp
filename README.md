@@ -120,6 +120,8 @@ Open <http://localhost:8080/> to see the app, using credentials `alice` / `alice
 * I had to add `ProxyPreserveHost` to the Apache configuration because otherwise the `redirect_uri` sent
 by Keycloak pointed at the internal app address
 
+## Setting up Keycloak
+
 Start Keycloak in [reverse proxy](https://www.keycloak.org/server/reverseproxy) mode:
 
 ```shell
@@ -128,7 +130,13 @@ $ docker run --name keycloak-proxy -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PAS
   --proxy edge --http-relative-path=/kc --hostname-strict=false --hostname-url=https://localhost/kc
 ```
 
-Also remember to import [this JSON file](backend/config/realm-export.json) on top of that.
+Access [Keycloak](http://localhost:8180/kc/admin/) and import [this JSON file](backend/config/realm-export.json) on top of that.
+
+Create a user in the realm:
+* Username: `foo`
+* Email: `foo@fake.com`
+* Email verified `true`
+* Credentials > Set password `foo`, Temporary: `false`
 
 ## Creating the certificate
 
@@ -154,7 +162,7 @@ openssl pkey -in localhost-key.pem -out localhost.key
 
 ## Setting up Apache
 
-```
+```shell
 docker rm -f apache-https
 docker run -dit --name apache-https -p 443:443 httpd:2.4.49
 docker cp httpd.conf apache-https:/usr/local/apache2/conf
@@ -171,8 +179,13 @@ starting from the certificate used to configure the Apache server - here we are
 choosing demo password `changeit`:
 
 ```shell
-keytool -importcert -alias keycloak -keystore cacerts.p12 \
-  -file localhost.crt -storepasswd changeit
+$ keytool -importcert -alias keycloak -keystore cacerts.p12 -file localhost.crt
+```
+
+To confirm success, list its contents (same password):
+
+```shell
+$ keytool -list -keystore cacerts.p12
 ```
 
 Then, add this to `application.properties` (I haven't been able to reverse proxy
