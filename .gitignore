@@ -6,3 +6,6 @@
 .env
 
 *.p12
+*.crt
+*.pem
+*.key
